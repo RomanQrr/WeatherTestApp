@@ -49,11 +49,11 @@ public class MainActivity extends AppCompatActivity {
             cashedLocation =  reader.readLine();
             cachedForecast = reader.readLine();
         } catch (IOException e) {
-            cashedLocation = savedInstanceState.getString("WeatherLocationJson", "{name: \"Omsk\",lat:54.991375,lon:73.371529}");
+            cashedLocation = savedInstanceState.getString("WeatherLocationJson", "{name: \"Omsk\",\"lat\":54.991375,\"lon\":73.371529}");
             cachedForecast = null;
             if(!cache.exists()){
                 try {
-                    cache.createTempFile(CACHE_NAME,null,getApplicationContext().getCacheDir());
+                    File.createTempFile(CACHE_NAME,null,getApplicationContext().getCacheDir());
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
                 }
