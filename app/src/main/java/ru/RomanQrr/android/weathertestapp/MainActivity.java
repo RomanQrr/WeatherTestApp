@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -40,6 +41,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+
         cache = new File(getApplicationContext().getCacheDir(), CACHE_NAME);
 
         String cashedLocation;
@@ -50,7 +54,8 @@ public class MainActivity extends AppCompatActivity {
             cachedForecast = reader.readLine();
         } catch (IOException e) {
             if(savedInstanceState != null) {
-                cashedLocation = savedInstanceState.getString("WeatherLocationJson", "{name: \"Omsk\",\"lat\":54.991375,\"lon\":73.371529}");
+                cashedLocation = savedInstanceState.getString("WeatherLocationJson",
+                        "{name: \"Omsk\",\"lat\":54.991375,\"lon\":73.371529}");
             } else{
                 cashedLocation = "{name: \"Omsk\",\"lat\":54.991375,\"lon\":73.371529}";
             }

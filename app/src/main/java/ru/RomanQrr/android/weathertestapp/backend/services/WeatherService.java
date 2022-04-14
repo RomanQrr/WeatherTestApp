@@ -21,7 +21,7 @@ import ru.RomanQrr.android.weathertestapp.backend.model.impl.weatherjson.Root;
 import ru.RomanQrr.android.weathertestapp.backend.model.interfaces.ForecastInterface;
 
 public class WeatherService {
-    private ArrayList<ForecastInterface> forecasts;
+    private ArrayList<Forecast> forecasts;
     private Type listType;
     private String apikey;
 
@@ -61,7 +61,8 @@ public class WeatherService {
         try{
             BufferedReader reader = new BufferedReader(new InputStreamReader(apiCall.openStream()));
             Gson gson = new Gson();
-            forecasts = gson.fromJson(reader, listType);
+            Root bla = gson.fromJson(reader, Root.class);
+            forecasts = bla.getList();
         } catch (IOException e) {
             throw new ForecastNotFoundException("IO problems", e);
         }
