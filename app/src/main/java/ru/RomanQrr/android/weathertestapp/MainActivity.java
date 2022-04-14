@@ -51,13 +51,6 @@ public class MainActivity extends AppCompatActivity {
         } catch (IOException e) {
             cashedLocation = savedInstanceState.getString("WeatherLocationJson", "{name: \"Omsk\",\"lat\":54.991375,\"lon\":73.371529}");
             cachedForecast = null;
-            if(!cache.exists()){
-                try {
-                    File.createTempFile(CACHE_NAME,null,getApplicationContext().getCacheDir());
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
-                }
-            }
         }
 
         locationService = new LocationService(APIKEY, new LocationBuilderImpl(), cashedLocation);
@@ -95,18 +88,19 @@ public class MainActivity extends AppCompatActivity {
         try{
             weatherService.fetchForecasts(locationService.getCoordinates());
             refresh();
-            try(BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(cache)))){
+            if(cache.exists()){
+                cache.delete();
+            }
+            File.createTempFile(CACHE_NAME, null, getApplicationContext().getCacheDir());
+            try(BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(cache)))) {
                 writer.write(locationService.getLocationAsJson());
                 writer.newLine();
                 writer.write(weatherService.getListAsJSON());
             }
-            catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
         catch (ForecastNotFoundException e){
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
