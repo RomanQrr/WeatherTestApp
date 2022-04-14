@@ -49,7 +49,11 @@ public class MainActivity extends AppCompatActivity {
             cashedLocation =  reader.readLine();
             cachedForecast = reader.readLine();
         } catch (IOException e) {
-            cashedLocation = savedInstanceState.getString("WeatherLocationJson", "{name: \"Omsk\",\"lat\":54.991375,\"lon\":73.371529}");
+            if(savedInstanceState != null) {
+                cashedLocation = savedInstanceState.getString("WeatherLocationJson", "{name: \"Omsk\",\"lat\":54.991375,\"lon\":73.371529}");
+            } else{
+                cashedLocation = "{name: \"Omsk\",\"lat\":54.991375,\"lon\":73.371529}";
+            }
             cachedForecast = null;
         }
 
