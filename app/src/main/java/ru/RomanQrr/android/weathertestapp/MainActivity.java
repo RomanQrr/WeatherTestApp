@@ -97,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
             refresh();
             try(BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(cache)))){
                 writer.write(locationService.getLocationAsJson());
+                writer.newLine();
                 writer.write(weatherService.getListAsJSON());
             }
             catch (FileNotFoundException e) {
