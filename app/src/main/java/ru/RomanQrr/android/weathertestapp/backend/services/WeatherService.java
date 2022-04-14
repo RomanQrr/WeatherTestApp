@@ -95,4 +95,9 @@ public class WeatherService {
         return forecasts.get(id).getHumidity();
     }
 
+    //Method returns JSON string of forecasts list
+    public String getListAsJSON(){
+        return new Gson().toJson(forecasts);
+    }
+
 }

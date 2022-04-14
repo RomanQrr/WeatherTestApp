@@ -1,5 +1,7 @@
 package ru.RomanQrr.android.weathertestapp.backend.builders.interfaces;
 
+import java.lang.reflect.Type;
+
 import ru.RomanQrr.android.weathertestapp.backend.DTO.CoordinatesDTO;
 import ru.RomanQrr.android.weathertestapp.backend.model.interfaces.Location;
 
@@ -10,4 +12,5 @@ public interface LocationBuilder {
     LocationBuilder setLat(double lat);
     LocationBuilder setLon(double lon);
     LocationBuilder reset();
+    Type getLocationType();
 }

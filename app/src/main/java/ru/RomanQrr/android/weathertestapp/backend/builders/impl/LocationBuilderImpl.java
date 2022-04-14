@@ -1,5 +1,7 @@
 package ru.RomanQrr.android.weathertestapp.backend.builders.impl;
 
+import java.lang.reflect.Type;
+
 import ru.RomanQrr.android.weathertestapp.backend.DTO.CoordinatesDTO;
 import ru.RomanQrr.android.weathertestapp.backend.builders.interfaces.LocationBuilder;
 import ru.RomanQrr.android.weathertestapp.backend.model.impl.LocationImpl;
@@ -53,4 +55,11 @@ public class LocationBuilderImpl implements LocationBuilder {
         lon = 0;
         return this;
     }
+
+    @Override
+    public Type getLocationType() {
+        return LocationImpl.class;
+    }
+
+
 }

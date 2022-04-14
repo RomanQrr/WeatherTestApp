@@ -1,5 +1,7 @@
 package ru.RomanQrr.android.weathertestapp.backend.services;
 
+import com.google.gson.Gson;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -28,6 +30,11 @@ public class LocationService {
                 .setLat(locationLat)
                 .setLon(lpcationLon)
                 .build();
+    }
+
+    public LocationService(String apiKey, LocationBuilder builder, String locationJson){
+        this(apiKey,builder);
+        location = new Gson().fromJson(locationJson, builder.getLocationType());
     }
 
     //Method attempts to fetch information about requested town and save it in location
@@ -79,6 +86,10 @@ public class LocationService {
 
     public CoordinatesDTO getCoordinates(){
         return location.getCoordinates();
+    }
+
+    public String getLocationAsJson(){
+        return new Gson().toJson(location);
     }
 
 

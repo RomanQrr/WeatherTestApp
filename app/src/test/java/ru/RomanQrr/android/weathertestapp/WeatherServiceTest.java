@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -50,7 +51,28 @@ public class WeatherServiceTest {
         assertEquals(30d, weatherService.getHumidity(1), DELTA);
         assertEquals(new Date(1650358800), weatherService.getTime(39));
         assertEquals("https://openweathermap.org/img/wn/04d", weatherService.getWeatherImageURL(38));
-
-
     }
+    @Test
+    public void weatherServiceTest3() {
+        String list;
+        try (BufferedReader reader = new BufferedReader(
+                new FileReader("D:\\Progects\\Work\\Android\\WeatherTestApp\\testWeatherForecast.txt"))) {
+            list = reader.readLine();
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("read from file failed");
+            return;
+        }
+        Type type = new TypeToken<ArrayList<Forecast>>() {}.getType();
+        WeatherService weatherService = new WeatherService(APIKEY, list, type);
+        WeatherService weatherService1 = new WeatherService(APIKEY, weatherService.getListAsJSON(), type);
+        for(int i = 0; i < 40; i++){
+            assertEquals(weatherService.getHumidity(i), weatherService1.getHumidity(i), DELTA);
+            assertEquals(weatherService.getWeatherImageURL(i), weatherService1.getWeatherImageURL(i));
+            assertEquals(weatherService.getTemp(i), weatherService1.getTemp(i), DELTA);
+            assertEquals(weatherService.getPressure(i), weatherService1.getPressure(i), DELTA);
+            assertEquals(weatherService.getTime(i),weatherService1.getTime(i));
+        }
+    }
+
 }

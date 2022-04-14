@@ -11,6 +11,15 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.google.gson.reflect.TypeToken;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 
 import ru.RomanQrr.android.weathertestapp.backend.Exceptions.ForecastNotFoundException;
@@ -22,41 +31,62 @@ import ru.RomanQrr.android.weathertestapp.backend.services.WeatherService;
 
 public class MainActivity extends AppCompatActivity {
     private static final String APIKEY = "931a6e2dd4fb0d3bb301a28edc77c44d";
+    private static final String CACHE_NAME = "WeatherAppCache";
 
     private LocationService locationService;
     private WeatherService weatherService;
+    private File cache;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //Attempt to restart location service from saved, with default values being Omsk
-        locationService = new LocationService(APIKEY, new LocationBuilderImpl(),
-                savedInstanceState.getString("WeatherLocationName", "Omsk"),
-                savedInstanceState.getDouble("WeatherLocationLat", 54.991375),
-                savedInstanceState.getDouble("WeatherLocationLon", 73.371529));
+        cache = new File(getApplicationContext().getCacheDir(), CACHE_NAME);
+
+        String cashedLocation;
+        String cachedForecast;
+
+        try(BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(cache)))) {
+            cashedLocation =  reader.readLine();
+            cachedForecast = reader.readLine();
+        } catch (IOException e) {
+            cashedLocation = savedInstanceState.getString("WeatherLocationJson", "{name: \"Omsk\",lat:54.991375,lon:73.371529}");
+            cachedForecast = null;
+            if(!cache.exists()){
+                try {
+                    cache.createTempFile(CACHE_NAME,null,getApplicationContext().getCacheDir());
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+            }
+        }
+
+        locationService = new LocationService(APIKEY, new LocationBuilderImpl(), cashedLocation);
 
         setContentView(R.layout.activity_main);
 
-        //Start the weather service, fetch fresh forecast for initialized location,
-        //and refresh UI if fetch was successful.
-        weatherService = new WeatherService(APIKEY, new TypeToken<ArrayList<Forecast>>() {}.getType());
-        updateForecast(null);
+        if(cachedForecast == null) {
+            weatherService = new WeatherService(APIKEY, new TypeToken<ArrayList<Forecast>>() {}.getType());
+            updateForecast(null);
+        }
+        else{
+            weatherService = new WeatherService(APIKEY,  cachedForecast, new TypeToken<ArrayList<Forecast>>() {}.getType());
+            refresh();
+        }
+
     }
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString("WeatherLocationName", locationService.getName());
-        outState.putDouble("WeatherLocationLat", locationService.getCoordinates().getLat());
-        outState.putDouble("WeatherLocationLon", locationService.getCoordinates().getLon());
-    }
+        outState.putString("WeatherLocationJson", "{name: \"Omsk\",lat:54.991375,lon:73.371529}");
+
+        }
 
     public void searchForLocation(View view){
         try {
             locationService.setLocation(((TextView) findViewById(R.id.location_search_bar)).getText().toString());
-            weatherService.fetchForecasts(locationService.getCoordinates());
-            refresh();
-        } catch (LocationNotFoundException | ForecastNotFoundException e) {
+            updateForecast(view);
+        } catch (LocationNotFoundException e) {
             e.printStackTrace();
         }
     }
@@ -65,6 +95,15 @@ public class MainActivity extends AppCompatActivity {
         try{
             weatherService.fetchForecasts(locationService.getCoordinates());
             refresh();
+            try(BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(cache)))){
+                writer.write(locationService.getLocationAsJson());
+                writer.write(weatherService.getListAsJSON());
+            }
+            catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         catch (ForecastNotFoundException e){
             e.printStackTrace();
