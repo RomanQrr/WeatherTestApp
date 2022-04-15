@@ -73,6 +73,7 @@ public class WeatherService {
         return new StringBuilder()
                 .append("https://openweathermap.org/img/wn/")
                 .append(forecasts.get(id).getWeatherImageName())
+                .append(".png")
                 .toString();
     }
 
